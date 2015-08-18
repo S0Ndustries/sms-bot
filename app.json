@@ -4,7 +4,7 @@
     "repository": "https://github.com/kikinteractive/bot-starter-kit-python",
     "env": {
         "USERNAME": {
-            "description": "The username of your bot",
+            "description": "SMSbot",
             "required": true
         },
         "API_KEY": {
