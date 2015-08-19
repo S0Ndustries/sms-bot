@@ -8,7 +8,7 @@
             "required": true
         },
         "API_KEY": {
-            "description": "Your API key for authenticating with the Chat Engine API",
+            "description": "6fe6f6dd-7970-4033-ae59-07bbd2f5d1cc",
             "required": true
         }
     }
