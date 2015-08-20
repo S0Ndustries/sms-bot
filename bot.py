@@ -113,7 +113,17 @@ def receive_messages():
 
     return Response(status=200)
 
-
+@app.route('/receive', methods=['POST'])
+if not verify_signature(request):
+    return Response(status=403, response='invalid signature')
+requests.post(
+    'https://engine.apikik.com/api/v1/message',
+    auth=(os.environ['USERNAME'], os.environ['API_KEY']),
+    headers={
+        'Content-Type': 'application/json'
+    },
+    data='{"messages":[{"to":"laura","type":"text","body":"bar"}]}'
+)   
 
 
 
