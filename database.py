@@ -9,7 +9,7 @@ url = urlparse.urlparse("postgres://lcgigjguzxyusa:Fl-W3fEmvP5mmgRSgoYiEF63Ro@ec
 
 
 # Table Format: cur.execute("CREATE TABLE Users(Stage INTEGER, Username VARCHAR(22), PhoneNumber INT)")
-# New Table Format: cur.execute("CREATE TABLE UserDB(hasGivenPhoneNum BOOLEAN, hasProvidedMessageBody BOOLEAN, Username VARCHAR(22), PhoneNumber INT)")
+# New Table Format: cur.execute("CREATE TABLE UserDB(hasGivenPhoneNum BOOLEAN, hasProvidedMessageBody BOOLEAN, Username VARCHAR(22), PhoneNumber INT, kpID VARCHAR(32))")
 
 
 #See if a given user is already in the database
@@ -36,7 +36,7 @@ def lookUpUser(username):
 
 
 #Add user to database
-def addUser(givenNum, givenMessage, username, phoneNumber):
+def addUser(givenNum, givenMessage, username, phoneNumber,kpID):
 
 	conn = psycopg2.connect(
 	database=url.path[1:],
@@ -48,7 +48,7 @@ def addUser(givenNum, givenMessage, username, phoneNumber):
 
 	cur = conn.cursor()
 
-	cur.execute("INSERT INTO UserDB VALUES(%s, %s, %s, %s)", (givenNum, givenMessage, username, phoneNumber))
+	cur.execute("INSERT INTO UserDB VALUES(%s, %s, %s, %s,%s)", (givenNum, givenMessage, username, phoneNumber,kpID))
 	
 	conn.commit()
 
@@ -183,6 +183,43 @@ def getPhoneNumber(username):
 
 	conn.close() #Needed?
 
+def setID(username,kpID):
+	conn = psycopg2.connect(
+	database=url.path[1:],
+	user=url.username,
+	password=url.password,
+	host=url.hostname,
+	port=url.port
+	)  
+
+	cur = conn.cursor()
+
+	cur.execute("UPDATE UserDB SET kpID=%s WHERE Username=%s", (kpID, username))   
+
+	conn.commit()
+
+	conn.close()
+
+def getUsernameFromID(kpID):
+
+	conn = psycopg2.connect(
+	database=url.path[1:],
+	user=url.username,
+	password=url.password,
+	host=url.hostname,
+	port=url.port
+	)  
+
+	cur = conn.cursor()
+
+	cur.execute("SELECT kpID, Username from UserDB")
+	rows = cur.fetchall()
+	for row in rows:
+		if row[0] == kpID:
+			return row[1]
+
+	conn.close() #Needed?
+
 
 
 def alterTable():
@@ -196,19 +233,17 @@ def alterTable():
 
 	cur = conn.cursor()
 
-	cur.execute("ALTER TABLE UserDB ALTER COLUMN PhoneNumber TYPE VARCHAR(20)")
-
+	cur.execute("ALTER TABLE UserDB ADD COLUMN kpID VARCHAR(32)")
 	
 	conn.commit()
 
 	conn.close()
 
 
-
-
-
 if __name__ == '__main__':
-	alterTable()
+    addUser('false','false', 'testing','0','0')
+    setID('testing','1234')
+    print getUsernameFromID('1234')
    
 
 
