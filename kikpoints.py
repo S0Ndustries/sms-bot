@@ -31,4 +31,3 @@ def points():
 
 # Things to Do:
 # Ask Sanchit/Mike about the callback urls and the url
-# Generate a RANDOMIZED id generator
