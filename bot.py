@@ -58,15 +58,35 @@ def receive_messages():
                 database.storePhoneNum(message['from'], message['body'])
 
             elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == True:
-                twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body'])
-                responses.append({
-                'type': 'text',
-                'to': message['from'],
-                'body': 'SMS Sent: \n To: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
-                'suggestedResponses': ['Send another message']
-                })
-                database.setGivenMessage(message['from'], 'false')
-                database.setGivenNum(message['from'], 'false')
+                result = twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body'])
+
+                if result == 'SUCCESS':
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'SMS Sent: \n To: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
+                    'suggestedResponses': ['Send another message']
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+                    database.setGivenNum(message['from'], 'false')
+                elif result == 'INVALID NUMBER':
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'We couldn\'t send your message because of an invalid number. Please enter a valid US or Canadian number.'
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+
+                elif result == 'MESSAGE NOT SENT. PLEASE TRY AGAIN.':
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'I couldn\'t send your message for some reason. What would you like to do?',
+                    'suggestedResponses': ['Send a new message']
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+                    database.setGivenNum(message['from'], 'false')
+
 
             else:
                 responses.append({
@@ -78,7 +98,7 @@ def receive_messages():
             responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Cool picture but there\'s not much I can do with it...' 
+                'body': 'Cool picture but there\'s not much I can do with it...yet...' 
                 })
 
             #Insert easter egg?
