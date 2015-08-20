@@ -15,14 +15,19 @@ def points():
 				      "id":"INSERT RANDOMIZED STRING",
 				      "sku":"KikPointsforSMS"
 				      "points":10,
-				      "url":"ygoel",
+				      "url":"INSERTURL",
 				      "callback_url":"URL_FOR_CONFIRMATION",
 				      #"data":{  
 				       #   //Any other arbitrary data you may need
 				      #}
 				   }	
-	    		}
+	    		},
+	    		"noForward":true
 	    		}]
 	    }
 	}, callback);
 	return
+
+# Things to Do:
+# Ask Sanchit/Mike about the callback urls and the url
+# Generate a RANDOMIZED id generator
