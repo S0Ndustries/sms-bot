@@ -52,7 +52,7 @@ def receive_messages():
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Please enter the message you\'d like to send to the number provided.' 
+                'body': 'Please enter the message you\'d like to send to ' + database.getPhoneNumber(message['from'])
                 })
                 database.setGivenMessage(message['from'],'true')
                 database.storePhoneNum(message['from'], message['body'])
@@ -62,7 +62,7 @@ def receive_messages():
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Your message has been sent succesfully. What would you like to do next?',
+                'body': 'Message Details: \n Recipient: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
                 'suggestedResponses': ['Send another message']
                 })
                 database.setGivenMessage(message['from'], 'false')
