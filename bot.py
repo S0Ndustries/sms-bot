@@ -41,7 +41,7 @@ def receive_messages():
                 #Add user to DB with default values
                 database.addUser('false','false', message['from'],0)
 
-            if message['body'] == 'Send a New Message':
+            elif message['body'] == 'Send a New Message':
                 responses.append({
                 'type': 'text',
                 'to': message['from'],

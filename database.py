@@ -185,11 +185,30 @@ def getPhoneNumber(username):
 
 
 
+def alterTable():
+	conn = psycopg2.connect(
+	database=url.path[1:],
+	user=url.username,
+	password=url.password,
+	host=url.hostname,
+	port=url.port
+	)  
+
+	cur = conn.cursor()
+
+	cur.execute("ALTER TABLE UserDB ALTER COLUMN PhoneNumber TYPE VARCHAR(20)")
+
+	
+	conn.commit()
+
+	conn.close()
+
+
+
 
 
 if __name__ == '__main__':
-	setGivenNum('jnide1', 'true')
-	hasGivenNum('jnide1')
+	alterTable()
    
 
 
