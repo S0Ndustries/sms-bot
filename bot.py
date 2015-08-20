@@ -65,7 +65,6 @@ def receive_messages():
                 'to': message['from'],
                 'body': 'Message sent.' 
                 })
-                #blase
 
             else:
                 responses.append({
