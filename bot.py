@@ -62,7 +62,7 @@ def receive_messages():
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Message Details: \n Recipient: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
+                'body': 'SMS Sent: \n To: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
                 'suggestedResponses': ['Send another message']
                 })
                 database.setGivenMessage(message['from'], 'false')
