@@ -81,7 +81,7 @@ def receive_messages():
                 'body': 'Cool picture but there\'s not much I can do with it...' 
                 })
 
-
+            #Insert easter egg?
 
     if responses:
         # send the responses through the Chat Engine API
