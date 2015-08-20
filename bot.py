@@ -25,7 +25,7 @@ def receive_messages():
                     'type': 'text',
                     'to': message['from'],
                     'body': 'Welcome to SMS Bot. I can help you send an SMS message to any number in the United States or Canada. What would you like to do?',
-                    'suggestedResponses': ['Send a New Message']
+                    'suggestedResponses': ['Send a new message']
                 })
                 #Add user to DB with default values
                 database.addUser('false','false', message['from'],0)
@@ -36,12 +36,11 @@ def receive_messages():
                     'type': 'text',
                     'to': message['from'],
                     'body': 'Welcome to SMS Bot. I can help you send an SMS message to any number in the United States or Canada. What would you like to do?',
-                    'suggestedResponses': ['Send a New Message']
+                    'suggestedResponses': ['Send a new message']
                 })
-                #Add user to DB with default values
-                database.addUser('false','false', message['from'],0)
+                database.addUser('false','false', message['from'],'0')
 
-            elif message['body'] == 'Send a New Message':
+            elif message['body'] == 'Send a new message' or message['body'] == 'Send another message':
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
@@ -53,26 +52,56 @@ def receive_messages():
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Please enter the message you\'d like to send to the number provided.' 
+                'body': 'Please enter the message you\'d like to send to ' + database.getPhoneNumber(message['from'])
                 })
                 database.setGivenMessage(message['from'],'true')
                 database.storePhoneNum(message['from'], message['body'])
 
             elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == True:
-                twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body'])
-                responses.append({
-                'type': 'text',
-                'to': message['from'],
-                'body': 'Message sent.' 
-                })
+                result = twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body'])
+
+                if result == 'SUCCESS':
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'SMS Sent: \n To: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
+                    'suggestedResponses': ['Send another message']
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+                    database.setGivenNum(message['from'], 'false')
+                elif result == 'INVALID NUMBER':
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'We couldn\'t send your message because of an invalid number. Please enter a valid US or Canadian number.'
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+
+                elif result == 'MESSAGE NOT SENT. PLEASE TRY AGAIN.':
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'I couldn\'t send your message for some reason. What would you like to do?',
+                    'suggestedResponses': ['Send a new message']
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+                    database.setGivenNum(message['from'], 'false')
+
 
             else:
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command' 
+                'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command.' 
+                })
+        elif message['type'] == 'picture':
+            responses.append({
+                'type': 'text',
+                'to': message['from'],
+                'body': 'Cool picture but there\'s not much I can do with it...yet...' 
                 })
 
+            #Insert easter egg?
 
     if responses:
         # send the responses through the Chat Engine API
