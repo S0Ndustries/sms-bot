@@ -59,7 +59,6 @@ def receive_messages():
                 database.storePhoneNum(message['from'], message['body'])
 
             elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == True:
-                #Insert logic to send the text messsage
                 twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body'])
                 responses.append({
                 'type': 'text',
