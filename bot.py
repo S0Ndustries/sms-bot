@@ -25,7 +25,7 @@ def receive_messages():
                     'type': 'text',
                     'to': message['from'],
                     'body': 'Welcome to SMS Bot. I can help you send an SMS message to any number in the United States or Canada. What would you like to do?',
-                    'suggestedResponses': ['Send a New Message']
+                    'suggestedResponses': ['Send a new message']
                 })
                 #Add user to DB with default values
                 database.addUser('false','false', message['from'],0)
@@ -36,12 +36,11 @@ def receive_messages():
                     'type': 'text',
                     'to': message['from'],
                     'body': 'Welcome to SMS Bot. I can help you send an SMS message to any number in the United States or Canada. What would you like to do?',
-                    'suggestedResponses': ['Send a New Message']
+                    'suggestedResponses': ['Send a new message']
                 })
-                #Add user to DB with default values
-                database.addUser('false','false', message['from'],0)
+                database.addUser('false','false', message['from'],'0')
 
-            elif message['body'] == 'Send a New Message':
+            elif message['body'] == 'Send a new message' or message['body'] == 'Send another message':
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
@@ -63,15 +62,25 @@ def receive_messages():
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Message sent.' 
+                'body': 'Your message has been sent succesfully. What would you like to do next?',
+                'suggestedResponses': ['Send another message']
                 })
+                database.setGivenMessage(message['from'], 'false')
+                database.setGivenNum(message['from'], 'false')
 
             else:
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command' 
+                'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command.' 
                 })
+        elif message['type'] == 'picture':
+            responses.append({
+                'type': 'text',
+                'to': message['from'],
+                'body': 'Cool picture but there\'s not much I can do with it...' 
+                })
+
 
 
     if responses:
