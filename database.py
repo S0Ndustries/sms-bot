@@ -9,7 +9,7 @@ url = urlparse.urlparse("postgres://lcgigjguzxyusa:Fl-W3fEmvP5mmgRSgoYiEF63Ro@ec
 
 
 # Table Format: cur.execute("CREATE TABLE Users(Stage INTEGER, Username VARCHAR(22), PhoneNumber INT)")
-# New Table Format: cur.execute("CREATE TABLE UserDB(hasGivenPhoneNum BOOLEAN, hasProvidedMessageBody BOOLEAN, Username VARCHAR(22), PhoneNumber INT, kpID VARCHAR(32))")
+# New Table Format: cur.execute("CREATE TABLE UserDB(hasGivenPhoneNum BOOLEAN, hasProvidedMessageBody BOOLEAN, Username VARCHAR(22), PhoneNumber INT, kpID VARCHAR(32), hasPaid BOOLEAN)")
 
 
 #See if a given user is already in the database
@@ -36,7 +36,7 @@ def lookUpUser(username):
 
 
 #Add user to database
-def addUser(givenNum, givenMessage, username, phoneNumber,kpID):
+def addUser(givenNum, givenMessage, username, phoneNumber,kpID,hasPaid):
 
 	conn = psycopg2.connect(
 	database=url.path[1:],
@@ -48,7 +48,7 @@ def addUser(givenNum, givenMessage, username, phoneNumber,kpID):
 
 	cur = conn.cursor()
 
-	cur.execute("INSERT INTO UserDB VALUES(%s, %s, %s, %s,%s)", (givenNum, givenMessage, username, phoneNumber,kpID))
+	cur.execute("INSERT INTO UserDB VALUES(%s, %s, %s, %s,%s,%s)", (givenNum, givenMessage, username, phoneNumber,kpID,hasPaid))
 	
 	conn.commit()
 
@@ -220,6 +220,43 @@ def getUsernameFromID(kpID):
 
 	conn.close() #Needed?
 
+def setHasPaid(username,newVal):
+	conn = psycopg2.connect(
+	database=url.path[1:],
+	user=url.username,
+	password=url.password,
+	host=url.hostname,
+	port=url.port
+	)  
+
+	cur = conn.cursor()
+
+	cur.execute("UPDATE UserDB SET hasPaid=%s WHERE Username=%s", (newVal, username))   
+
+	conn.commit()
+
+	conn.close()
+
+def hasPaid(username):
+
+	conn = psycopg2.connect(
+	database=url.path[1:],
+	user=url.username,
+	password=url.password,
+	host=url.hostname,
+	port=url.port
+	)  
+
+	cur = conn.cursor()
+
+	cur.execute("SELECT Username, hasPaid from UserDB")
+	rows = cur.fetchall()
+	for row in rows:
+		if row[0] == username:
+			return row[1]
+
+	conn.close() #Needed?
+
 
 
 def alterTable():
@@ -233,7 +270,7 @@ def alterTable():
 
 	cur = conn.cursor()
 
-	cur.execute("ALTER TABLE UserDB ADD COLUMN kpID VARCHAR(32)")
+	cur.execute("ALTER TABLE UserDB ADD COLUMN hasPaid BOOLEAN")
 	
 	conn.commit()
 
@@ -241,9 +278,7 @@ def alterTable():
 
 
 if __name__ == '__main__':
-    addUser('false','false', 'testing','0','0')
-    setID('testing','1234')
-    print getUsernameFromID('1234')
+    alterTable()
    
 
 

@@ -48,7 +48,7 @@ def receive_messages():
                     'body': 'Welcome to SMS Bot. I can help you send an SMS message to any number in the United States or Canada for only 10 Kik Points! What would you like to do?',
                     'suggestedResponses': ['Send a new message']
                 })
-                database.addUser('false','false', message['from'],'0','0')
+                database.addUser('false','false', message['from'],'0','0','false')
         #Other responses    
         elif message['type'] == 'text':
             if database.lookUpUser(message['from']) == False:
@@ -58,10 +58,19 @@ def receive_messages():
                     'body': 'Welcome to SMS Bot. I can help you send an SMS message to any number in the United States or Canada for only 10 Kik Points! What would you like to do?',
                     'suggestedResponses': ['Send a new message']
                 })
-                database.addUser('false','false', message['from'],'0','0')
+                database.addUser('false','false', message['from'],'0','0','false')
 
-            elif message['body'] == 'Send a new message' or message['body'] == 'Send another message': #TODO:Regex this
+            elif ((message['body'] == 'Send a new message' or message['body'] == 'Send another message') and database.hasPaid(message['from']) == False): #TODO:Regex this
                 chargePoints(message['from'])
+
+
+            elif message['body'] == 'Change my message' and database.hasPaid(message['from']) == True:
+                responses.append({
+                'type': 'text',
+                'to': message['from'],
+                'body': 'Enter the phone number you\'d like to send a message to.'
+                })
+                database.setGivenNum(message['from'],'true')
 
             elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == False:
                 phone_number_check = re.search('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',message['body']) #Use Regex to check for proper phone-number format
@@ -81,7 +90,7 @@ def receive_messages():
                     'body': message['body'] + ' is not a valid US or Canada number. Please enter a valid number! Tip: Do NOT add +1 to the number!'
                     })
 
-            elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == True:
+            elif ((database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == True) or (message['body'] == 'Retry' and database.hasPaid(message['from']) == True)):
                 if twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body']):
                     responses.append({
                     'type': 'text',
@@ -91,12 +100,13 @@ def receive_messages():
                     })
                     database.setGivenMessage(message['from'], 'false')
                     database.setGivenNum(message['from'], 'false')
+                    database.setHasPaid(message['from'],'false')
                 else:
                     responses.append({
                     'type': 'text',
                     'to': message['from'],
-                    'body': 'I couldn\'t send your message for some reason. What would you like to do?',
-                    'suggestedResponses': ['Send a new message', 'Retry']
+                    'body': 'I could not send your message for some reason. What would you like to do?',
+                    'suggestedResponses': ['Change my message','Retry']
                     })
                     database.setGivenMessage(message['from'], 'false')
                     database.setGivenNum(message['from'], 'false')
@@ -105,7 +115,7 @@ def receive_messages():
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command.' 
+                'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command such as \'Send a new message\'.' 
                 })
         elif message['type'] == 'picture':
             responses.append({
@@ -138,10 +148,11 @@ def callback_message():
     data= '{"messages":[{"to":"%s","type":"text", "body":"Transaction successful. Enter the phone number you\'d like to send a message to." }]}' % username
     )   
     database.setGivenNum(username,'true')
+    database.setHasPaid(username,'true')
     return Response(status=200)
 
 
-#Bugs: Double message from Kik Points, if the msg fails to send the user is still charged lol
+
 
 
 
