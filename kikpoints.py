@@ -11,6 +11,7 @@ def points():
 	    		"to":message['from'],
 	    		"type":"link",
 	    		"url":"https://points.kik.com"
+<<<<<<< HEAD
 	    		"transaction":{  
 				     "id":random_gen.randomgen(),
 				     "sku":"KikPointsforSMS"
@@ -21,8 +22,28 @@ def points():
 				     #   //Any other arbitrary data you may need
 				     #}
 				   },
+=======
+	    		"data":{
+	    			"transaction":{  
+				      "id":random_gen.randomgen(),
+				      "sku":"KikPointsforSMS"
+				      "points":10,
+				      #"url":"points.kik.com",
+				      #"callback_url":"https://sms-chat-bot.herokuapp.com/kikpoints",
+				      #"data":{  
+				       #   //Any other arbitrary data you may need
+				      #}
+				   }	
+	    		},
+>>>>>>> origin/master
 	    		"noForward":true
 	    		}]
 	    }
 	}, callback);
 	return
+<<<<<<< HEAD
+=======
+
+# Things to Do:
+# Ask Sanchit/Mike about the callback urls and the url
+>>>>>>> origin/master
