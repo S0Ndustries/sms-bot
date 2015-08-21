@@ -10,11 +10,7 @@ def sendsms(phonenumber, usermessage):
 		message = client.messages.create(body=usermessage,
 		    to=phonenumber,  
 		    from_="+12264003340")
-		return "SUCCESS"
+		return True
 	except Exception as error:
-		error_string = str(error)
-		error_string = re.search('https\:\/\/www\.twilio\.com\/docs\/errors\/[0-9]*',error_string).group()[35:]
-		if error_string == '21211':
-			return "INVALID NUMBER"
-		else:
-			return "MESSAGE NOT SENT. PLEASE TRY AGAIN."
+		return False
+

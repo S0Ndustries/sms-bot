@@ -6,6 +6,7 @@ import database
 import twilio_api
 import random_gen
 import logging 
+import re
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -14,7 +15,6 @@ app.config['DEBUG'] = True
 #Function to trigger Kik Points transaction
 def chargePoints(username):
     userID = random_gen.randomgen()
-    app.logger.debug(userID)
     requests.post(
     'https://engine.apikik.com/api/v1/message',
     auth=('smsbot', '6fe6f6dd-7970-4033-ae59-07bbd2f5d1cc'),
@@ -64,45 +64,42 @@ def receive_messages():
                 chargePoints(message['from'])
 
             elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == False:
-                responses.append({
-                'type': 'text',
-                'to': message['from'],
-                'body': 'Please enter the message you\'d like to send to ' + message['body']
-                })
-                database.setGivenMessage(message['from'],'true')
-                database.storePhoneNum(message['from'], message['body'])
+                phone_number_check = re.search('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',message['body']) #Use Regex to check for proper phone-number format
+
+                if (phone_number_check):
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'Please enter the message you\'d like to send to ' + message['body']
+                    })
+                    database.setGivenMessage(message['from'],'true')
+                    database.storePhoneNum(message['from'], message['body'])
+                else:
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': message['body'] + ' is not a valid US or Canada number. Please enter a valid number! Tip: Do NOT add +1 to the number!'
+                    })
 
             elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == True:
-                print ''
-               #result = twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body'])
-
-                #if result == 'SUCCESS':
-                 #   responses.append({
-                  #  'type': 'text',
-                   # 'to': message['from'],
-                   # 'body': 'SMS Sent: \n To: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
-                   # 'suggestedResponses': ['Send another message']
-                   # })
-                   # database.setGivenMessage(message['from'], 'false')
-                   # database.setGivenNum(message['from'], 'false')
-                #elif result == 'INVALID NUMBER':
-                 #   responses.append({
-                 #   'type': 'text',
-                  #  'to': message['from'],
-                   # 'body': 'We couldn\'t send your message because of an invalid number. Please enter a valid US or Canadian number.'
-                   # })
-                   # database.setGivenMessage(message['from'], 'false')
-
-                #elif result == 'MESSAGE NOT SENT. PLEASE TRY AGAIN.':
-                 #   responses.append({
-                  #  'type': 'text',
-                   # 'to': message['from'],
-                   # 'body': 'I couldn\'t send your message for some reason. What would you like to do?',
-                   # 'suggestedResponses': ['Send a new message']
-                   # })
-                   # database.setGivenMessage(message['from'], 'false')
-                   # database.setGivenNum(message['from'], 'false')
-
+                if twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body']):
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'SMS Sent: \n To: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
+                    'suggestedResponses': ['Send another message']
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+                    database.setGivenNum(message['from'], 'false')
+                else:
+                    responses.append({
+                    'type': 'text',
+                    'to': message['from'],
+                    'body': 'I couldn\'t send your message for some reason. What would you like to do?',
+                    'suggestedResponses': ['Send a new message', 'Retry']
+                    })
+                    database.setGivenMessage(message['from'], 'false')
+                    database.setGivenNum(message['from'], 'false')
 
             else:
                 responses.append({
@@ -138,13 +135,13 @@ def callback_message():
     headers={
         'Content-Type': 'application/json'
     },
-    data= '{"messages":[{"to":"%s","type":"text", "body":"Transaction successful. Which phone number shall I send a message to? Tip: Don\'t forget to prepend +1 to the number!" }]}' % username
+    data= '{"messages":[{"to":"%s","type":"text", "body":"Transaction successful. Enter the phone number you\'d like to send a message to." }]}' % username
     )   
     database.setGivenNum(username,'true')
     return Response(status=200)
 
 
-
+#Bugs: Double message from Kik Points, if the msg fails to send the user is still charged lol
 
 
 
