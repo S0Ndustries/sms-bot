@@ -5,8 +5,11 @@ import os
 import database
 import twilio_api
 import random_gen
+<<<<<<< Updated upstream
 import logging 
 import re
+=======
+>>>>>>> Stashed changes
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -24,6 +27,38 @@ def chargePoints(username):
     data= '{"messages":[{"to":"%s","type":"link","url" :"https://points.kik.com/", "text" : "Click me to use your Kik Points",  "noForward" : true , "attribution": {"name": "Kik Points", "iconUrl": "http://offer-service.appspot.com/static/kp-icon.50.jpg"} , "kikJsData" : {"transaction" : {"id" : "%s", "points" : 10, "sku" : "com.kp.forSms", "url" : "https://e008dd1d.ngrok.io/kikpoints", "callback_url" : "https://e008dd1d.ngrok.io/kikpoints"} }}]}' % (username, userID)
     )  
     database.setID(username,userID)
+    return
+
+
+
+
+#Function to trigger Kik Points transaction
+def points():
+    request.post({
+        url: "https://engine.apikik.com/api/v1/message",
+        auth: {
+            "user": "smsbot",
+            "pass": "6fe6f6dd-7970-4033-ae59-07bbd2f5d1cc"
+        },
+        json: {
+            "messages":[{
+                "to":message['from'],
+                "type":"link",
+                "url":"https://points.kik.com"
+                "transaction":{
+                     "id":random_gen.randomgen(),
+                     "sku":"KikPointsforSMS"
+                     "points":10,
+                     "url":"https://e008dd1d.ngrok.io",
+                     "callback_url":"https://e008dd1d.ngrok.io/kikpoints",
+                     #"data":{
+                     #   //Any other arbitrary data you may need
+                     #}
+                   },
+                "noForward":true
+                }]
+        }
+    }, callback);
     return
 
 
@@ -48,8 +83,14 @@ def receive_messages():
                     'body': 'Welcome to SMS Bot. I can help you send an SMS message to any number in the United States or Canada for only 10 Kik Points! What would you like to do?',
                     'suggestedResponses': ['Send a new message']
                 })
+<<<<<<< Updated upstream
                 database.addUser('false','false', message['from'],'0','0','false')
         #Other responses    
+=======
+                #Add user to DB with default values
+                database.addUser('false','false', message['from'],0)
+        #Other responses
+>>>>>>> Stashed changes
         elif message['type'] == 'text':
             if database.lookUpUser(message['from']) == False:
                 responses.append({
@@ -60,6 +101,7 @@ def receive_messages():
                 })
                 database.addUser('false','false', message['from'],'0','0','false')
 
+<<<<<<< Updated upstream
             elif ((message['body'] == 'Send a new message' or message['body'] == 'Send another message') and database.hasPaid(message['from']) == False): #TODO:Regex this
                 chargePoints(message['from'])
 
@@ -110,18 +152,72 @@ def receive_messages():
                     })
                     database.setGivenMessage(message['from'], 'false')
                     database.setGivenNum(message['from'], 'false')
+=======
+            elif message['body'] == 'Send a new message' or message['body'] == 'Send another message':
+                points()
+                #responses.append({
+                #'type': 'text',
+                #'to': message['from'],
+                #'body': 'Please enter the phone number you\'d like to send the SMS to (must be a US or Canada number)'
+                #})
+                #database.setGivenNum(message['from'],'true')
+
+            elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == False:
+                responses.append({
+                'type': 'text',
+                'to': message['from'],
+                'body': 'Please enter the message you\'d like to send to ' + message['body']
+                })
+                database.setGivenMessage(message['from'],'true')
+                database.storePhoneNum(message['from'], message['body'])
+
+            elif database.hasGivenNum(message['from']) == True and database.hasGivenMessage(message['from']) == True:
+               #result = twilio_api.sendsms(database.getPhoneNumber(message['from']), message['body'])
+
+                #if result == 'SUCCESS':
+                 #   responses.append({
+                  #  'type': 'text',
+                   # 'to': message['from'],
+                   # 'body': 'SMS Sent: \n To: ' + database.getPhoneNumber(message['from']) + '\n Message: ' + message['body'] + '\n What would you like to do next?',
+                   # 'suggestedResponses': ['Send another message']
+                   # })
+                   # database.setGivenMessage(message['from'], 'false')
+                   # database.setGivenNum(message['from'], 'false')
+                #elif result == 'INVALID NUMBER':
+                 #   responses.append({
+                 #   'type': 'text',
+                  #  'to': message['from'],
+                   # 'body': 'We couldn\'t send your message because of an invalid number. Please enter a valid US or Canadian number.'
+                   # })
+                   # database.setGivenMessage(message['from'], 'false')
+
+                #elif result == 'MESSAGE NOT SENT. PLEASE TRY AGAIN.':
+                 #   responses.append({
+                  #  'type': 'text',
+                   # 'to': message['from'],
+                   # 'body': 'I couldn\'t send your message for some reason. What would you like to do?',
+                   # 'suggestedResponses': ['Send a new message']
+                   # })
+                   # database.setGivenMessage(message['from'], 'false')
+                   # database.setGivenNum(message['from'], 'false')
+
+>>>>>>> Stashed changes
 
             else:
                 responses.append({
                 'type': 'text',
                 'to': message['from'],
+<<<<<<< Updated upstream
                 'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command such as \'Send a new message\'.' 
+=======
+                'body': 'I\'m not sure what you\'re trying to tell me. Please provide a valid command.'
+>>>>>>> Stashed changes
                 })
         elif message['type'] == 'picture':
             responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Cool picture but there\'s not much I can do with it...yet...' 
+                'body': 'Cool picture but there\'s not much I can do with it...yet...'
                 })
 
             #Insert easter egg?
@@ -137,6 +233,7 @@ def receive_messages():
     return Response(status=200)
 
 @app.route('/kikpoints', methods=['POST'])
+<<<<<<< Updated upstream
 def callback_message():
     username = database.getUsernameFromID(request.json['id'])
     requests.post(
@@ -151,6 +248,19 @@ def callback_message():
     database.setHasPaid(username,'true')
     return Response(status=200)
 
+=======
+if not verify_signature(request):
+    return Response(status=403, response='invalid signature')
+requests.post(
+    'https://engine.apikik.com/api/v1/message',
+    auth=(os.environ['USERNAME'], os.environ['API_KEY']),
+    headers={
+        'Content-Type': 'application/json'
+    },
+    data='{"messages":[{"to":\'' + message['from'] + '\',"type":"text","body":"Please enter the phone number you\'d like to send the SMS to (must be a US or Canada number)"}]}'
+)
+database.setGivenNum(message['from'],'true')
+>>>>>>> Stashed changes
 
 
 
