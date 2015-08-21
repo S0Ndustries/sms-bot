@@ -22,7 +22,7 @@ def chargePoints(username):
     headers={
         'Content-Type': 'application/json'
     },
-    data= '{"messages":[{"to":"%s","type":"link","url" :"https://points.kik.com/", "text" : "Click me to use your Kik Points",  "noForward" : true , "attribution": {"name": "Kik Points", "iconUrl": "http://offer-service.appspot.com/static/kp-icon.50.jpg"} , "kikJsData" : {"transaction" : {"id" : "%s", "points" : 10, "sku" : "com.kp.forSms", "url" : "https://e008dd1d.ngrok.io/kikpoints", "callback_url" : "https://e008dd1d.ngrok.io/kikpoints"} }}]}' % (username, userID)
+    data= '{"messages":[{"to":"%s","type":"link","url" :"https://points.kik.com/", "text" : "Click me to use your Kik Points",  "noForward" : true , "attribution": {"name": "Kik Points", "iconUrl": "http://offer-service.appspot.com/static/kp-icon.50.jpg"} , "kikJsData" : {"transaction" : {"id" : "%s", "points" : 10, "sku" : "com.kp.forSms", "url" : "https://sms-chat-bot.herokuapp.com/kikpoints", "callback_url" : "https://sms-chat-bot.herokuapp.com/kikpoints"} }}]}' % (username, userID)
     )  
     database.setID(username,userID)
     return
