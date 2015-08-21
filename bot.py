@@ -7,6 +7,7 @@ import twilio_api
 import random_gen
 import logging 
 import re
+import facedetect
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -121,10 +122,9 @@ def receive_messages():
             responses.append({
                 'type': 'text',
                 'to': message['from'],
-                'body': 'Cool picture but there\'s not much I can do with it...yet...' 
+                'body': 'There\'s not much I can do with this picture...'
                 })
 
-            #Insert easter egg?
 
     if responses:
         # send the responses through the Chat Engine API
